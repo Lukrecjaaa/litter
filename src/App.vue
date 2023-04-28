@@ -3,7 +3,7 @@
 
     <div class="section">
       <p class="title large-title">Litter!!<br/>🌷📦</p>
-      <p class="subtitle">Maximum allowed size is {{ max_size }} MiB</p>
+      <p class="subtitle">Maximum allowed size is {{ max_size_text }}</p>
     </div>
 
     <div>
@@ -34,7 +34,7 @@
       </b-field>
 
       <b-field>
-        <b-upload v-model="dropped_files" multiple drag-drop type="is-success" @input="temp">
+        <b-upload v-model="dropped_files" multiple drag-drop type="is-success" @input="handle_files">
           <section class="section" id="upload-field">
             <div class="content has-text-centered">
               <p>
@@ -49,8 +49,16 @@
 
     <div id="upload-field" style="margin-bottom: 48px;">
       <UploadStatus
-        v-for="(file, index) in file_queue"
-        :file="file"
+        v-for="(item, index) in [...file_queue].reverse()"
+        :file="item.file"
+        :started="item.started"
+        :uploaded="item.uploaded"
+        :failed="item.failed"
+        :err_message="item.err_message"
+        :url="item.url"
+        :progress_percent="item.progress_percent"
+        :progress_text="item.progress_text"
+        :expire_after="item.expire_after"
         v-bind:key="index"
       ></UploadStatus>
     </div>
@@ -59,6 +67,19 @@
 
 <script>
 import UploadStatus from './components/UploadStatus.vue';
+import axios from 'axios';
+
+const units = ["bytes", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"];
+
+function prettyPrintBytes(value) {
+  let index = 0;
+
+  while (value >= 1024 && ++index) {
+    value = value / 1024;
+  }
+
+  return +parseFloat(value).toFixed(2) + " " + units[index];
+}
 
 export default {
   name: 'App',
@@ -70,20 +91,76 @@ export default {
       dropped_files: [],
       file_queue: [],
       expire_after: '24',
-      max_size: 0
+      max_size: 0,
+      max_size_text: '',
+      index: 0
     };
   },
   methods: {
-    temp() {
+    handle_files() {
       this.dropped_files.forEach(file => {
-        file.expire_after = this.expire_after;
-        this.file_queue.push(file);
+        let queueItem = {
+          file: file,
+          expire_after: this.expire_after,
+          started: true,
+          uploaded: false,
+          failed: false,
+          err_message: '',
+          url: '',
+          progress_percent: 0,
+        };
+
+        this.file_queue.push(queueItem);
         this.dropped_files = [];
+
+        this.upload_file(this.index);
+        this.index++;
       });
+    },
+    upload_file(index) {
+      let item = this.file_queue[index];
+      if (item.file.size > this.max_size) {
+        item.started = false;
+        item.uploaded = false;
+        item.failed = true;
+
+        item.err_message = `Maximum file size exceeded (max ${prettyPrintBytes(this.max_size)}, got ${prettyPrintBytes(item.file.size)})`;
+      } else {
+        // const that = this;
+        const headers = { "Content-Type": "multipart/form-data" };
+        const formData = new FormData();
+        formData.append('file', item.file);
+    
+    
+        axios.post(`${process.env.VUE_APP_API_URL}/upload`, formData, {
+          headers,
+          onUploadProgress: function (progressEvent) {
+            item.progress_percent = (progressEvent.loaded / progressEvent.total) * 100;
+            item.progress_text = prettyPrintBytes(progressEvent.loaded);
+          },
+          timeout: 300000
+        })
+        .then(() => {
+          // TODO: API returns path to the file maybe
+          // TODO: before this step, the API saves the file's original name,
+          //       short code and expiry_date to redis
+          item.url = item.file.name;
+          item.started = false;
+          item.uploaded = true;
+          item.failed = false;
+        })
+        .catch((err) => {
+          item.err_message = err.message;
+          item.started = false;
+          item.uploaded = false;
+          item.failed = true;
+        });
+      }
     }
   },
   mounted() {
-    this.max_size = Number(process.env.VUE_APP_MAX_FILE_SIZE_MIB);
+    this.max_size = Number(process.env.VUE_APP_MAX_FILE_SIZE || 104857600);
+    this.max_size_text = prettyPrintBytes(this.max_size);
   },
   watch: {}
 };

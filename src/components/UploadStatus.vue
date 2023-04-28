@@ -17,7 +17,7 @@
       <div id="button-div" v-if="!failed">
         <b-icon icon="trash-can" id="remove-button" v-if="uploaded"></b-icon>
         <div id="expires">
-          <p style="font-size: 0.8rem;"><b-icon icon="history" size="is-small"></b-icon>{{ length_text(file.expire_after) }}</p>
+          <p style="font-size: 0.8rem;"><b-icon icon="history" size="is-small"></b-icon>{{ length_text(expire_after) }}</p>
         </div>
       </div>
     </div>
@@ -25,32 +25,11 @@
 </template>
 
 <script>
-import axios from 'axios';
-
-const units = ["bytes", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"];
-
-function prettyPrintBytes(value) {
-  let index = 0;
-
-  while (value >= 1024 && ++index) {
-    value = value / 1024;
-  }
-
-  return value.toFixed(2) + " " + units[index];
-}
-
 export default {
-  props: ['file'],
+  props: ['file', 'started', 'uploaded', 'failed', 'err_message', 'url', 'progress_percent', 'progress_text', 'expire_after'],
   data() {
     return {
-      started: true,
-      uploaded: false,
-      failed: false,
-      url: '',
-      progress_percent: 0,
-      progress_text: '',
-      show_url: true,
-      err_message: ''
+      show_url: true
     }
   },
   methods: {
@@ -71,45 +50,6 @@ export default {
         case "72":
           return "3 days";
       }
-    }
-  },
-  created() {
-    if (this.file.size > Number(process.env.VUE_APP_MAX_FILE_SIZE_MIB) * 1048576) {
-      this.started = false;
-      this.uploaded = false;
-      this.failed = true;
-
-      this.err_message = `Maximum file size exceeded (max ${process.env.VUE_APP_MAX_FILE_SIZE_MIB} MiB, got ${prettyPrintBytes(this.file.size)})`;
-    } else {
-      const that = this;
-      const headers = { "Content-Type": "multipart/form-data" };
-      const formData = new FormData();
-      formData.append('file', this.file);
-  
-  
-      axios.post('http://localhost:3000/upload', formData, {
-        headers,
-        onUploadProgress: function (progressEvent) {
-          that.progress_percent = (progressEvent.loaded / progressEvent.total) * 100;
-          that.progress_text = prettyPrintBytes(progressEvent.loaded);
-        },
-        timeout: 300000
-      })
-      .then(() => {
-        // TODO: API returns path to the file maybe
-        // TODO: before this step, the API saves the file's original name,
-        //       short code and expiry_date to redis
-        this.url = this.file.name;
-        this.started = false;
-        this.uploaded = true;
-        this.failed = false;
-      })
-      .catch((err) => {
-        this.err_message = err.message;
-        this.started = false;
-        this.uploaded = false;
-        this.failed = true;
-      });
     }
   }
 }
