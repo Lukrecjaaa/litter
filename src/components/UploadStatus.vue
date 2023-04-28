@@ -7,18 +7,23 @@
           {{ progress_text }}
         </b-progress>
       </div>
+
       <div id="inner" v-else-if="uploaded">
         <p>{{ file.name }}</p>
-        <Transition name="fade" mode="out-in">
-          <code class="upload-success" v-if="show_url" @click="copy_clipboard">{{ url }}</code>
-          <p style="font-size: large; margin: 3px;" v-else>Copied to clipboard!</p>
-        </Transition>
+        <code class="upload-success" v-if="show_url" @click="copy_clipboard">{{ url }}</code>
+        <p style="font-size: large; margin: 3px;" v-else>Copied to clipboard!</p>
       </div>
+      
       <div v-else-if="failed">
         <p>Uploading <code>{{ file.name }}</code> failed! {{ err_message }}</p>
       </div>
-      <div id="button-div" v-if="!failed">
-        <b-icon icon="trash-can" id="remove-button" v-if="uploaded"></b-icon>
+
+      <div v-else-if="removed">
+        <p>File <code>{{ file.name }}</code> safely removed!</p>
+      </div>
+      
+      <div id="button-div" v-if="started || uploaded">
+        <b-icon icon="trash-can" id="remove-button" v-if="uploaded" @click.native="$emit('remove')"></b-icon>
         <div id="expires">
           <p style="font-size: 0.8rem;"><b-icon icon="history" size="is-small"></b-icon>{{ length_text(expire_after) }}</p>
         </div>
@@ -29,7 +34,7 @@
 
 <script>
 export default {
-  props: ['file', 'started', 'uploaded', 'failed', 'err_message', 'url', 'progress_percent', 'progress_text', 'expire_after'],
+  props: ['file', 'started', 'uploaded', 'failed', 'removed', 'err_message', 'url', 'progress_percent', 'progress_text', 'expire_after'],
   data() {
     return {
       show_url: true
@@ -40,7 +45,7 @@ export default {
       this.show_url = false;
       navigator.clipboard.writeText(this.url);
 
-      setTimeout(() => this.show_url = true, 1000);
+      setTimeout(() => this.show_url = true, 1500);
     },
     length_text(expire_after) {
       switch (expire_after) {
@@ -124,15 +129,5 @@ code {
 
 .success {
   background-color: rgba(72, 199, 116, 0.3);
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
 }
 </style>

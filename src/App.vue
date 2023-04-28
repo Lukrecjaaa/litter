@@ -54,12 +54,14 @@
         :started="item.started"
         :uploaded="item.uploaded"
         :failed="item.failed"
+        :removed="item.removed"
         :err_message="item.err_message"
         :url="item.url"
         :progress_percent="item.progress_percent"
         :progress_text="item.progress_text"
         :expire_after="item.expire_after"
         v-bind:key="index"
+        @remove="remove_file(item.index)"
       ></UploadStatus>
     </div>
   </div>
@@ -105,9 +107,12 @@ export default {
           started: true,
           uploaded: false,
           failed: false,
+          removed: false,
           err_message: '',
+          filename_encoded: '',
           url: '',
           progress_percent: 0,
+          index: this.index
         };
 
         this.file_queue.push(queueItem);
@@ -123,6 +128,7 @@ export default {
         item.started = false;
         item.uploaded = false;
         item.failed = true;
+        item.removed = false;
 
         item.err_message = `Maximum file size exceeded (max ${prettyPrintBytes(this.max_size)}, got ${prettyPrintBytes(item.file.size)})`;
       } else {
@@ -140,18 +146,39 @@ export default {
           timeout: 300000
         })
         .then((res) => {
-          item.url = `${window.location.origin}${window.location.pathname}${res.data.path}`;
+          item.filename_encoded = res.data.path;
+          item.url = `${window.location.origin}${window.location.pathname}${item.filename_encoded}`;
           item.started = false;
           item.uploaded = true;
           item.failed = false;
+          item.removed = false;
         })
         .catch((err) => {
           item.err_message = err.message;
           item.started = false;
           item.uploaded = false;
           item.failed = true;
+          item.removed = false;
         });
       }
+    },
+    remove_file(index) {
+      let item = this.file_queue[index];
+
+      axios.get(`${process.env.VUE_APP_API_URL}/remove/${item.filename_encoded}`)
+      .then(() => {
+        item.started = false;
+        item.uploaded = false;
+        item.failed = false;
+        item.removed = true;
+      })
+      .catch((err) => {
+        item.err_message = err.message;
+        item.started = false;
+        item.uploaded = false;
+        item.failed = true;
+        item.removed = false;
+      });
     }
   },
   mounted() {
