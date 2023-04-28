@@ -126,7 +126,6 @@ export default {
 
         item.err_message = `Maximum file size exceeded (max ${prettyPrintBytes(this.max_size)}, got ${prettyPrintBytes(item.file.size)})`;
       } else {
-        // const that = this;
         const headers = { "Content-Type": "multipart/form-data" };
         const formData = new FormData();
         formData.append('file', item.file);
@@ -140,7 +139,7 @@ export default {
           timeout: 300000
         })
         .then((res) => {
-          item.url = `${process.env.BASE_URL}/${res.data.path}`;
+          item.url = `${window.location.origin}${window.location.pathname}${res.data.path}`;
           item.started = false;
           item.uploaded = true;
           item.failed = false;
