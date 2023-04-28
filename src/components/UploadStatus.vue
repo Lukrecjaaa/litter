@@ -8,8 +8,11 @@
         </b-progress>
       </div>
       <div id="inner" v-else-if="uploaded">
-        <code v-if="show_url" @click="copy_clipboard">{{ url }}</code>
-        <p v-else>Copied to clipboard!</p>
+        <p>{{ file.name }}</p>
+        <Transition name="fade" mode="out-in">
+          <code class="upload-success" v-if="show_url" @click="copy_clipboard">{{ url }}</code>
+          <p style="font-size: large; margin: 3px;" v-else>Copied to clipboard!</p>
+        </Transition>
       </div>
       <div v-else-if="failed">
         <p>Uploading <code>{{ file.name }}</code> failed! {{ err_message }}</p>
@@ -56,6 +59,15 @@ export default {
 </script>
 
 <style scoped>
+code {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.upload-success {
+  font-size: x-large;
+  color: black;
+}
+
 #box {
   margin: 6px;
   padding: 8px;
@@ -79,6 +91,7 @@ export default {
 
 #inner {
   width: 85%;
+  text-align: center;
 }
 
 #inner > p {
@@ -111,5 +124,15 @@ export default {
 
 .success {
   background-color: rgba(72, 199, 116, 0.3);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

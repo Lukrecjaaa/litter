@@ -129,6 +129,7 @@ export default {
         const headers = { "Content-Type": "multipart/form-data" };
         const formData = new FormData();
         formData.append('file', item.file);
+        formData.append('expire_after', item.expire_after);
     
         axios.post(`${process.env.VUE_APP_API_URL}/`, formData, {
           headers,
