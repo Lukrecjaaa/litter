@@ -131,8 +131,7 @@ export default {
         const formData = new FormData();
         formData.append('file', item.file);
     
-    
-        axios.post(`${process.env.VUE_APP_API_URL}/upload`, formData, {
+        axios.post(`${process.env.VUE_APP_API_URL}/`, formData, {
           headers,
           onUploadProgress: function (progressEvent) {
             item.progress_percent = (progressEvent.loaded / progressEvent.total) * 100;
@@ -140,11 +139,8 @@ export default {
           },
           timeout: 300000
         })
-        .then(() => {
-          // TODO: API returns path to the file maybe
-          // TODO: before this step, the API saves the file's original name,
-          //       short code and expiry_date to redis
-          item.url = item.file.name;
+        .then((res) => {
+          item.url = `${process.env.BASE_URL}/${res.data.path}`;
           item.started = false;
           item.uploaded = true;
           item.failed = false;
