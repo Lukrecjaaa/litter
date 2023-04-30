@@ -6,7 +6,17 @@
       <p class="subtitle">Maximum allowed size is {{ max_size_text }}</p>
     </div>
 
-    <div>
+    <b-notification
+      type="is-danger"
+      has-icon
+      role="alert"
+      :closable="false"
+      v-model="tokenError"
+      style="width: 300px; margin: 0 auto; margin-bottom: 48px;">
+      Can't get session token, please refresh the page to try again.
+    </b-notification>
+
+    <div v-if="!tokenError">
       <b-field position="is-centered">
           <b-radio-button v-model="expire_after"
               native-value="1"
@@ -55,6 +65,7 @@
         :uploaded="item.uploaded"
         :failed="item.failed"
         :removed="item.removed"
+        :err_text="item.err_text"
         :err_message="item.err_message"
         :url="item.url"
         :progress_percent="item.progress_percent"
@@ -95,7 +106,9 @@ export default {
       expire_after: '24',
       max_size: 0,
       max_size_text: '',
-      index: 0
+      index: 0,
+      token: '',
+      tokenError: false
     };
   },
   methods: {
@@ -108,11 +121,12 @@ export default {
           uploaded: false,
           failed: false,
           removed: false,
+          err_text: '',
           err_message: '',
           filename_encoded: '',
           url: '',
           progress_percent: 0,
-          index: this.index
+          index: this.index,
         };
 
         this.file_queue.push(queueItem);
@@ -129,7 +143,8 @@ export default {
         item.uploaded = false;
         item.failed = true;
         item.removed = false;
-
+        
+        item.err_text = 'Cannot upload file';
         item.err_message = `Maximum file size exceeded (max ${prettyPrintBytes(this.max_size)}, got ${prettyPrintBytes(item.file.size)})`;
       } else {
         const headers = { "Content-Type": "multipart/form-data" };
@@ -143,7 +158,10 @@ export default {
             item.progress_percent = (progressEvent.loaded / progressEvent.total) * 100;
             item.progress_text = prettyPrintBytes(progressEvent.loaded);
           },
-          timeout: 300000
+          timeout: 300000,
+          params: {
+            token: this.token
+          }
         })
         .then((res) => {
           item.filename_encoded = res.data.path;
@@ -154,7 +172,8 @@ export default {
           item.removed = false;
         })
         .catch((err) => {
-          item.err_message = err.message;
+          item.err_text = 'Cannot upload file';
+          item.err_message = err.response.data.message;
           item.started = false;
           item.uploaded = false;
           item.failed = true;
@@ -165,7 +184,12 @@ export default {
     remove_file(index) {
       let item = this.file_queue[index];
 
-      axios.get(`${process.env.VUE_APP_API_URL}/remove/${item.filename_encoded}`)
+      axios.get(`${process.env.VUE_APP_API_URL}/remove/${item.filename_encoded}`,
+      {
+        params: {
+          token: this.token
+        }
+      })
       .then(() => {
         item.started = false;
         item.uploaded = false;
@@ -173,7 +197,8 @@ export default {
         item.removed = true;
       })
       .catch((err) => {
-        item.err_message = err.message;
+        item.err_text = 'Cannot remove file';
+        item.err_message = err.response.data.message;
         item.started = false;
         item.uploaded = false;
         item.failed = true;
@@ -184,6 +209,13 @@ export default {
   mounted() {
     this.max_size = Number(process.env.VUE_APP_MAX_FILE_SIZE || 104857600);
     this.max_size_text = prettyPrintBytes(this.max_size);
+    axios.get(`${process.env.VUE_APP_API_URL}/token`)
+      .then((res) => {
+        this.token = res.data.token;
+      })
+      .catch(() => {
+        this.tokenError = true;
+      });
   },
   watch: {}
 };

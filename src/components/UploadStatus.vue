@@ -15,7 +15,7 @@
       </div>
       
       <div v-else-if="failed">
-        <p>Uploading <code>{{ file.name }}</code> failed! {{ err_message }}</p>
+        <p>{{ err_text }} <code>{{ file.name }}</code>: {{ err_message }}</p>
       </div>
 
       <div v-else-if="removed">
@@ -34,7 +34,7 @@
 
 <script>
 export default {
-  props: ['file', 'started', 'uploaded', 'failed', 'removed', 'err_message', 'url', 'progress_percent', 'progress_text', 'expire_after'],
+  props: ['file', 'started', 'uploaded', 'failed', 'removed', 'err_text', 'err_message', 'url', 'progress_percent', 'progress_text', 'expire_after'],
   data() {
     return {
       show_url: true
