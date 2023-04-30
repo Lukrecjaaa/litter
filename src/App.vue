@@ -12,8 +12,9 @@
       role="alert"
       :closable="false"
       v-model="tokenError"
-      style="width: 300px; margin: 0 auto; margin-bottom: 48px;">
-      Can't get session token, please refresh the page to try again.
+      style="width: 300px; margin: 0 auto; margin-bottom: 48px; text-align: start;">
+      Can't get session token, please refresh the page to try again.<br>
+      <code>{{ tokenErrorMessage }}</code>
     </b-notification>
 
     <div v-if="!tokenError">
@@ -108,7 +109,8 @@ export default {
       max_size_text: '',
       index: 0,
       token: '',
-      tokenError: false
+      tokenError: false,
+      tokenErrorMessage: ''
     };
   },
   methods: {
@@ -152,7 +154,7 @@ export default {
         formData.append('file', item.file);
         formData.append('expire_after', item.expire_after);
     
-        axios.post(`${process.env.VUE_APP_API_URL}/`, formData, {
+        axios.post(`${process.env.VUE_APP_API_URL}/upload`, formData, {
           headers,
           onUploadProgress: function (progressEvent) {
             item.progress_percent = (progressEvent.loaded / progressEvent.total) * 100;
@@ -173,7 +175,7 @@ export default {
         })
         .catch((err) => {
           item.err_text = 'Cannot upload file';
-          item.err_message = err.response.data.message;
+          item.err_message = err.response.data;
           item.started = false;
           item.uploaded = false;
           item.failed = true;
@@ -198,7 +200,7 @@ export default {
       })
       .catch((err) => {
         item.err_text = 'Cannot remove file';
-        item.err_message = err.response.data.message;
+        item.err_message = err.response.data;
         item.started = false;
         item.uploaded = false;
         item.failed = true;
@@ -213,7 +215,8 @@ export default {
       .then((res) => {
         this.token = res.data.token;
       })
-      .catch(() => {
+      .catch((err) => {
+        this.tokenErrorMessage = err;
         this.tokenError = true;
       });
   },
