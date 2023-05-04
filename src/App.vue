@@ -334,6 +334,7 @@ export default {
           url: '',
           progress_percent: 0,
           index: this.index,
+          burn: this.burnAfterDownload
         };
 
         this.file_queue.push(queueItem);
@@ -368,12 +369,13 @@ export default {
         let formData;
         if (encrypted) {
           formData = formDataEnc;
-          formData.append('expire_after', item.expire_after);
         } else {
           formData = new FormData();
           formData.append('file', item.file);
-          formData.append('expire_after', item.expire_after);
         }
+        
+        formData.append('expire_after', item.expire_after);
+        formData.append('burn', item.burn);
     
         axios.post(`${process.env.VUE_APP_API_URL}/upload`, formData, {
           headers,
@@ -449,6 +451,7 @@ export default {
           url: '',
           progress_percent: 0,
           index: this.index_enc,
+          burn: this.burnAfterDownload
         };
 
         this.file_queue_enc.push(queueItem);
