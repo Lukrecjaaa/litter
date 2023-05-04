@@ -505,8 +505,6 @@ export default {
     decrypt_file() {
       axios.get(this.encryptedUrl, { responseType: 'arraybuffer' })
         .then(async (res) => {
-          console.log(res.headers);
-          console.log(res.headers['content-disposition']);
           let filename = /filename="(.*)\.gpg"/.exec(res.headers['content-disposition'])[1];
           const encrypted = new Uint8Array(res.data);
           
