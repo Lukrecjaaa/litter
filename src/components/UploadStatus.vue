@@ -1,31 +1,40 @@
+<!-- eslint-disable vue/no-deprecated-v-on-native-modifier -->
 <template>
   <div id="box" :class="(failed) ? 'failed' : (uploaded) ? 'success' : ''">
     <div id="outer">
       <div id="inner" v-if="started">
         <p>Uploading {{ file.name }}...</p>
-        <b-progress type="is-success" :value="progress_percent" show-value>
-          {{ progress_text }}
+        <b-progress type="is-success" :value="progressPercent" show-value>
+          {{ progressText }}
         </b-progress>
       </div>
 
       <div id="inner" v-else-if="uploaded">
         <p>{{ file.name }}</p>
-        <code class="upload-success" v-if="show_url" @click="copy_clipboard">{{ url }}</code>
+        <code class="upload-success" v-if="show_url" @click="copyClipboard">{{ url }}</code>
         <p style="font-size: large; margin: 3px;" v-else>Copied to clipboard!</p>
       </div>
-      
+
       <div v-else-if="failed">
-        <p>{{ err_text }} <code>{{ file.name }}</code>: {{ err_message }}</p>
+        <p>{{ errText }} <code>{{ file.name }}</code>: {{ errMessage }}</p>
       </div>
 
       <div v-else-if="removed">
         <p>File <code>{{ file.name }}</code> safely removed!</p>
       </div>
-      
+
       <div id="button-div" v-if="started || uploaded">
-        <b-icon icon="trash-can" id="remove-button" v-if="uploaded" @click.native="$emit('remove')"></b-icon>
+        <b-icon
+          icon="trash-can"
+          id="remove-button"
+          v-if="uploaded"
+          @click.native="$emit('remove')">
+        </b-icon>
         <div id="expires">
-          <p style="font-size: 0.8rem;"><b-icon icon="history" size="is-small"></b-icon>{{ length_text(expire_after) }}</p>
+          <p style="font-size: 0.8rem;">
+            <b-icon icon="history" size="is-small"></b-icon>
+            {{ lengthText(expireAfter) }}
+          </p>
         </div>
       </div>
     </div>
@@ -34,33 +43,35 @@
 
 <script>
 export default {
-  props: ['file', 'started', 'uploaded', 'failed', 'removed', 'err_text', 'err_message', 'url', 'progress_percent', 'progress_text', 'expire_after'],
+  props: ['file', 'started', 'uploaded', 'failed', 'removed', 'errText', 'errMessage', 'url', 'progressPercent', 'progressText', 'expireAfter'],
   data() {
     return {
-      show_url: true
-    }
+      show_url: true,
+    };
   },
   methods: {
-    copy_clipboard() {
+    copyClipboard() {
       this.show_url = false;
       navigator.clipboard.writeText(this.url);
 
-      setTimeout(() => this.show_url = true, 1500);
+      setTimeout(() => { this.show_url = true; }, 1500);
     },
-    length_text(expire_after) {
-      switch (expire_after) {
-        case "1":
-          return "1h";
-        case "12":
-          return "12h";
-        case "24":
-          return "1 day";
-        case "72":
-          return "3 days";
+    lengthText(expireAfter) {
+      switch (expireAfter) {
+        case '1':
+          return '1h';
+        case '12':
+          return '12h';
+        case '24':
+          return '1 day';
+        case '72':
+          return '3 days';
+        default:
+          return 'N/A';
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <style scoped>

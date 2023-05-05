@@ -3,7 +3,7 @@
 
     <div class="section">
       <p class="title large-title">Litter!!<br/>🌷📦</p>
-      <p class="subtitle">Maximum allowed size is {{ max_size_text }}</p>
+      <p class="subtitle">Maximum allowed size is {{ maxSizeText }}</p>
     </div>
 
     <b-notification
@@ -21,7 +21,7 @@
         <b-switch v-model="burnAfterDownload">
           Burn-after-download
         </b-switch>
-  
+
         <b-switch v-model="encrypt">
           Encryption mode
         </b-switch>
@@ -58,23 +58,23 @@
           <p>
             Private key <b
               :style="{
-                'color': private_key ? '#48c78e' : '#f14668'
+                'color': privateKey ? '#48c78e' : '#f14668'
               }">
-                {{ private_key ? "loaded" : "not loaded" }}
+                {{ privateKey ? "loaded" : "not loaded" }}
             </b>
           </p>
 
-          <div v-if="private_key" style="display: block;">
+          <div v-if="privateKey" style="display: block;">
             <b-field position="is-centered">
               <b-input placeholder="Link to the encrypted file" v-model="encryptedUrl"></b-input>
               <p class="control">
-                <b-button class="button is-primary" @click="decrypt_file">Download</b-button>
+                <b-button class="button is-primary" @click="decryptFile">Download</b-button>
               </p>
             </b-field>
           </div>
 
           <div v-else>
-            <b-button @click="generate_key_pair">
+            <b-button @click="generateKeyPair">
               <b-icon icon="key"></b-icon>
               <span>Generate key pair</span>
             </b-button>
@@ -82,14 +82,14 @@
             <p>or</p>
 
             <b-field class="file is-primary is-centered">
-              <b-upload v-model="private_key_file" class="file-label" @input="handle_private_key">
+              <b-upload v-model="privateKeyFile" class="file-label" @input="handlePrivateKey">
                 <span class="file-cta">
                   <b-icon class="file-icon" icon="file-key"></b-icon>
                   <span class="file-label">Upload private key</span>
                 </span>
               </b-upload>
             </b-field>
-  
+
           </div>
         </div>
         <div v-else class="encryption-view">
@@ -106,34 +106,34 @@
           <p>
             Public key <b
               :style="{
-                'color': public_key ? '#48c78e' : '#f14668'
+                'color': publicKey ? '#48c78e' : '#f14668'
               }">
-                {{ public_key ? "loaded" : "not loaded" }}
+                {{ publicKey ? "loaded" : "not loaded" }}
             </b>
           </p>
 
-          <div v-if="public_key" style="margin-top: 16px;">
+          <div v-if="publicKey" style="margin-top: 16px;">
             <div style="margin-bottom: 16px;">
               <b-field position="is-centered">
-                <b-radio-button v-model="expire_after"
+                <b-radio-button v-model="expireAfter"
                     native-value="1"
                     type="is-info is-light is-outlined">
                     <span>1h</span>
                 </b-radio-button>
-        
-                <b-radio-button v-model="expire_after"
+
+                <b-radio-button v-model="expireAfter"
                     native-value="12"
                     type="is-info is-light is-outlined">
                     <span>12h</span>
                 </b-radio-button>
-        
-                <b-radio-button v-model="expire_after"
+
+                <b-radio-button v-model="expireAfter"
                     native-value="24"
                     type="is-info is-light is-outlined">
                     <span>1 day</span>
                 </b-radio-button>
-        
-                <b-radio-button v-model="expire_after"
+
+                <b-radio-button v-model="expireAfter"
                     native-value="72"
                     type="is-info is-light is-outlined">
                     <span>3 days</span>
@@ -142,7 +142,12 @@
             </div>
 
             <b-field>
-              <b-upload v-model="dropped_files_enc" drag-drop multiple type="is-success" @input="handle_files_enc">
+              <b-upload
+                v-model="droppedFilesEnc"
+                drag-drop
+                multiple
+                type="is-success"
+                @input="handleFilesEnc">
                 <section class="section" id="upload-field">
                   <div class="content has-text-centered">
                     <p>
@@ -154,15 +159,15 @@
               </b-upload>
             </b-field>
             <hr>
-            <div v-if="file_queue_enc.length > 0">
+            <div v-if="fileQueueEnc.length > 0">
               <p>Encryption queue</p>
               <EncryptStatus
-                v-for="(item, index) in [...file_queue_enc].reverse()"
+                v-for="(item, index) in [...fileQueueEnc].reverse()"
                 :file="item.file"
                 :started="item.started"
                 :failed="item.failed"
-                :err_text="item.err_text"
-                :err_message="item.err_message"
+                :errText="item.errText"
+                :errMessage="item.errMessage"
                 v-bind:key="index"
               ></EncryptStatus>
             </div>
@@ -170,23 +175,23 @@
               <p>The encryption queue is empty</p>
             </div>
             <hr>
-            <div v-if="file_queue_enc_upload.length > 0">
+            <div v-if="fileQueueEncUpload.length > 0">
               <p>Upload queue</p>
               <UploadStatus
-                v-for="(item, index) in [...file_queue_enc_upload].reverse()"
+                v-for="(item, index) in [...fileQueueEncUpload].reverse()"
                 :file="item.file"
                 :started="item.started"
                 :uploaded="item.uploaded"
                 :failed="item.failed"
                 :removed="item.removed"
-                :err_text="item.err_text"
-                :err_message="item.err_message"
+                :errText="item.errText"
+                :errMessage="item.errMessage"
                 :url="item.url"
-                :progress_percent="item.progress_percent"
+                :progressPercent="item.progressPercent"
                 :progress_text="item.progress_text"
-                :expire_after="item.expire_after"
+                :expireAfter="item.expireAfter"
                 v-bind:key="index"
-                @remove="remove_file(item.index, true)"
+                @remove="removeFile(item.index, true)"
               ></UploadStatus>
             </div>
             <div v-else>
@@ -195,7 +200,7 @@
           </div>
           <div v-else style="margin-top: 4px;">
             <b-field class="file is-primary is-centered">
-              <b-upload v-model="public_key_file" class="file-label" @input="handle_public_key">
+              <b-upload v-model="publicKeyFile" class="file-label" @input="handlePublicKey">
                 <span class="file-cta">
                   <b-icon class="file-icon" icon="file-key"></b-icon>
                   <span class="file-label">Upload public key</span>
@@ -209,25 +214,25 @@
 
     <div v-if="!tokenError && !encrypt">
       <b-field position="is-centered">
-        <b-radio-button v-model="expire_after"
+        <b-radio-button v-model="expireAfter"
             native-value="1"
             type="is-info is-light is-outlined">
             <span>1h</span>
         </b-radio-button>
 
-        <b-radio-button v-model="expire_after"
+        <b-radio-button v-model="expireAfter"
             native-value="12"
             type="is-info is-light is-outlined">
             <span>12h</span>
         </b-radio-button>
 
-        <b-radio-button v-model="expire_after"
+        <b-radio-button v-model="expireAfter"
             native-value="24"
             type="is-info is-light is-outlined">
             <span>1 day</span>
         </b-radio-button>
 
-        <b-radio-button v-model="expire_after"
+        <b-radio-button v-model="expireAfter"
             native-value="72"
             type="is-info is-light is-outlined">
             <span>3 days</span>
@@ -235,7 +240,12 @@
       </b-field>
 
       <b-field>
-        <b-upload v-model="dropped_files" multiple drag-drop type="is-success" @input="handle_files">
+        <b-upload
+        v-model="droppedFiles"
+        multiple
+        drag-drop
+        type="is-success"
+        @input="handleFiles">
           <section class="section" id="upload-field">
             <div class="content has-text-centered">
               <p>
@@ -246,23 +256,23 @@
           </section>
         </b-upload>
       </b-field>
-      
+
       <div id="upload-field" style="margin-bottom: 48px;">
         <UploadStatus
-          v-for="(item, index) in [...file_queue].reverse()"
+          v-for="(item, index) in [...fileQueue].reverse()"
           :file="item.file"
           :started="item.started"
           :uploaded="item.uploaded"
           :failed="item.failed"
           :removed="item.removed"
-          :err_text="item.err_text"
-          :err_message="item.err_message"
+          :errText="item.errText"
+          :errMessage="item.errMessage"
           :url="item.url"
-          :progress_percent="item.progress_percent"
+          :progressPercent="item.progressPercent"
           :progress_text="item.progress_text"
-          :expire_after="item.expire_after"
+          :expireAfter="item.expireAfter"
           v-bind:key="index"
-          @remove="remove_file(item.index)"
+          @remove="removeFile(item.index)"
         ></UploadStatus>
       </div>
     </div>
@@ -270,102 +280,104 @@
 </template>
 
 <script>
-import UploadStatus from './components/UploadStatus.vue';
-import EncryptStatus from './components/EncryptStatus.vue';
 import axios from 'axios';
 import * as openpgp from 'openpgp';
 
-const units = ["bytes", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"];
+import UploadStatus from './components/UploadStatus.vue';
+import EncryptStatus from './components/EncryptStatus.vue';
+
+const units = ['bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
 
 function prettyPrintBytes(value) {
   let index = 0;
+  let val = value;
 
-  while (value >= 1024 && ++index) {
-    value = value / 1024;
+  while (val >= 1024 && ++index) {
+    val /= 1024;
   }
 
-  return +parseFloat(value).toFixed(2) + " " + units[index];
+  return `${+parseFloat(val).toFixed(2)} ${units[index]}`;
 }
 
 export default {
   name: 'App',
   components: {
     UploadStatus,
-    EncryptStatus
+    EncryptStatus,
   },
   data() {
     return {
-      dropped_files: [],
-      dropped_files_enc: [],
-      file_queue: [],
-      file_queue_enc: [],
-      file_queue_enc_upload: [],
-      expire_after: '24',
-      max_size: 0,
-      max_size_text: '',
+      droppedFiles: [],
+      droppedFilesEnc: [],
+      fileQueue: [],
+      fileQueueEnc: [],
+      fileQueueEncUpload: [],
+      expireAfter: '24',
+      maxSize: 0,
+      maxSizeText: '',
       index: 0,
-      index_enc: 0,
-      index_enc_upload: 0,
+      indexEnc: 0,
+      indexEncUpload: 0,
       token: '',
       tokenError: false,
       burnAfterDownload: false,
       encrypt: false,
       useDecryption: false,
-      private_key_file: null,
-      private_key: null,
-      public_key_file: null,
-      public_key: null,
+      privateKeyFile: null,
+      privateKey: null,
+      publicKeyFile: null,
+      publicKey: null,
       encryptedUrl: '',
     };
   },
   methods: {
-    handle_files() {
-      this.dropped_files.forEach(file => {
-        let queueItem = {
-          file: file,
-          expire_after: this.expire_after,
+    handleFiles() {
+      this.droppedFiles.forEach((file) => {
+        const queueItem = {
+          file,
+          expireAfter: this.expireAfter,
           started: true,
           uploaded: false,
           failed: false,
           removed: false,
-          err_text: '',
-          err_message: '',
-          filename_encoded: '',
+          errText: '',
+          errMessage: '',
+          filenameEncoded: '',
           url: '',
-          progress_percent: 0,
+          progressPercent: 0,
           index: this.index,
-          burn: this.burnAfterDownload
+          burn: this.burnAfterDownload,
         };
 
-        this.file_queue.push(queueItem);
-        this.dropped_files = [];
+        this.fileQueue.push(queueItem);
+        this.droppedFiles = [];
 
-        this.upload_file(this.index);
+        this.uploadFile(this.index);
         this.index++;
       });
     },
-    upload_file(index, encrypted = false, formDataEnc = null) {
+    uploadFile(index, encrypted = false, formDataEnc = null) {
       let item;
       if (encrypted) {
-        item = this.file_queue_enc_upload[index];
+        item = this.fileQueueEncUpload[index];
       } else {
-        item = this.file_queue[index];
+        item = this.fileQueue[index];
       }
-      if (item.file.size > this.max_size) {
+      if (item.file.size > this.maxSize) {
         item.started = false;
         item.uploaded = false;
         item.failed = true;
         item.removed = false;
-        
-        item.err_text = 'Cannot upload file';
-        item.err_message = `Maximum file size exceeded (max ${prettyPrintBytes(this.max_size)}, got ${prettyPrintBytes(item.file.size)})`;
+
+        item.errText = 'Cannot upload file';
+        item.errMessage = `Maximum file size exceeded (max ${prettyPrintBytes(this.maxSize)}, got ${prettyPrintBytes(item.file.size)})`;
       } else {
         item.started = true;
         item.uploaded = false;
         item.failed = false;
         item.removed = false;
 
-        const headers = { "Content-Type": "multipart/form-data" };
+        const headers = { 'Content-Type': 'multipart/form-data' };
         let formData;
         if (encrypted) {
           formData = formDataEnc;
@@ -373,102 +385,104 @@ export default {
           formData = new FormData();
           formData.append('file', item.file);
         }
-        
-        formData.append('expire_after', item.expire_after);
+
+        formData.append('expireAfter', item.expireAfter);
         formData.append('burn', item.burn);
-    
+
         axios.post(`${process.env.VUE_APP_API_URL}/upload`, formData, {
           headers,
-          onUploadProgress: function (progressEvent) {
-            item.progress_percent = (progressEvent.loaded / progressEvent.total) * 100;
+          onUploadProgress(progressEvent) {
+            item.progressPercent = (progressEvent.loaded / progressEvent.total) * 100;
             item.progress_text = prettyPrintBytes(progressEvent.loaded);
           },
           timeout: 300000,
           params: {
-            token: this.token
-          }
+            token: this.token,
+          },
         })
-        .then((res) => {
-          item.filename_encoded = res.data.path;
-          item.url = `${window.location.origin}${window.location.pathname}${item.filename_encoded}`;
+          .then((res) => {
+            item.filenameEncoded = res.data.path;
+            item.url = `${window.location.origin}${window.location.pathname}${item.filenameEncoded}`;
+            item.started = false;
+            item.uploaded = true;
+            item.failed = false;
+            item.removed = false;
+          })
+          .catch((err) => {
+            item.errText = 'Cannot upload file';
+            item.errMessage = err.response.data;
+            item.started = false;
+            item.uploaded = false;
+            item.failed = true;
+            item.removed = false;
+          });
+      }
+    },
+    removeFile(index, encrypted = false) {
+      let item;
+
+      if (encrypted) {
+        item = this.fileQueueEnc[index];
+      } else {
+        item = this.fileQueue[index];
+      }
+
+      axios.get(
+        `${process.env.VUE_APP_API_URL}/remove/${item.filenameEncoded}`,
+        {
+          params: {
+            token: this.token,
+          },
+        },
+      )
+        .then(() => {
           item.started = false;
-          item.uploaded = true;
+          item.uploaded = false;
           item.failed = false;
-          item.removed = false;
+          item.removed = true;
         })
         .catch((err) => {
-          item.err_text = 'Cannot upload file';
-          item.err_message = err.response.data;
+          item.errText = 'Cannot remove file';
+          item.errMessage = err.response.data;
           item.started = false;
           item.uploaded = false;
           item.failed = true;
           item.removed = false;
         });
-      }
     },
-    remove_file(index, encrypted = false) {
-      let item;
-
-      if (encrypted) {
-        item = this.file_queue_enc[index];
-      } else {
-        item = this.file_queue[index];
-      }
-
-      axios.get(`${process.env.VUE_APP_API_URL}/remove/${item.filename_encoded}`,
-      {
-        params: {
-          token: this.token
-        }
-      })
-      .then(() => {
-        item.started = false;
-        item.uploaded = false;
-        item.failed = false;
-        item.removed = true;
-      })
-      .catch((err) => {
-        item.err_text = 'Cannot remove file';
-        item.err_message = err.response.data;
-        item.started = false;
-        item.uploaded = false;
-        item.failed = true;
-        item.removed = false;
-      });
-    },
-    handle_files_enc() {
-      this.dropped_files_enc.forEach(file => {
-        let queueItem = {
-          file: file,
-          expire_after: this.expire_after,
+    handleFilesEnc() {
+      this.droppedFilesEnc.forEach((file) => {
+        const queueItem = {
+          file,
+          expireAfter: this.expireAfter,
           started: true,
           uploaded: false,
           failed: false,
           removed: false,
-          err_text: '',
-          err_message: '',
-          filename_encoded: '',
+          errText: '',
+          errMessage: '',
+          filenameEncoded: '',
           url: '',
-          progress_percent: 0,
-          index: this.index_enc,
-          burn: this.burnAfterDownload
+          progressPercent: 0,
+          index: this.indexEnc,
+          burn: this.burnAfterDownload,
         };
 
-        this.file_queue_enc.push(queueItem);
-        this.dropped_files_enc = [];
+        this.fileQueueEnc.push(queueItem);
+        this.droppedFilesEnc = [];
 
-        this.encrypt_file(this.index_enc);
-        this.index_enc++;
+        this.encryptFile(this.indexEnc);
+        this.indexEnc++;
       });
     },
-    encrypt_file(index) {
-      let item = this.file_queue_enc[index];
-      if (item.file.size > this.max_size) {
+    encryptFile(index) {
+      const item = this.fileQueueEnc[index];
+      if (item.file.size > this.maxSize) {
         item.started = false;
         item.failed = true;
-        
-        item.err_text = 'Cannot encrypt file';
-        item.err_message = `Maximum file size exceeded (max ${prettyPrintBytes(this.max_size)}, got ${prettyPrintBytes(item.file.size)})`;
+
+        item.errText = 'Cannot encrypt file';
+        item.errMessage = `Maximum file size exceeded (max ${prettyPrintBytes(this.maxSize)}, got ${prettyPrintBytes(item.file.size)})`;
       } else {
         const reader = new FileReader();
         reader.readAsArrayBuffer(item.file);
@@ -478,44 +492,43 @@ export default {
           try {
             openpgp.encrypt({
               message: await openpgp.createMessage({ binary: new Uint8Array(data) }),
-              encryptionKeys: this.public_key,
-              format: 'binary'
+              encryptionKeys: this.publicKey,
+              format: 'binary',
             }).then((encrypted) => {
               item.started = false;
               item.failed = false;
 
               const blob = new Blob([encrypted], { type: 'application/pgp-encrypted' });
               const formData = new FormData();
-              formData.append('file', blob, item.file.name + '.gpg');
+              formData.append('file', blob, `${item.file.name}.gpg`);
 
-              this.file_queue_enc_upload.push(item);
-              this.upload_file(this.index_enc_upload, true, formData);
-              this.index_enc_upload++;
+              this.fileQueueEncUpload.push(item);
+              this.uploadFile(this.indexEncUpload, true, formData);
+              this.indexEncUpload++;
             });
           } catch (error) {
             item.started = false;
             item.failed = true;
-            item.err_text = 'Failed to encrypt file';
-            item.err_message = error;
-            console.log(error);
+            item.errText = 'Failed to encrypt file';
+            item.errMessage = error;
           }
         };
       }
     },
-    decrypt_file() {
+    decryptFile() {
       axios.get(this.encryptedUrl, { responseType: 'arraybuffer' })
         .then(async (res) => {
-          let filename = /filename="(.*)\.gpg"/.exec(res.headers['content-disposition'])[1];
+          const filename = /filename="(.*)\.gpg"/.exec(res.headers['content-disposition'])[1];
           const encrypted = new Uint8Array(res.data);
-          
+
           const encryptedMessage = await openpgp.readMessage({
-            binaryMessage: encrypted
+            binaryMessage: encrypted,
           });
-          
+
           const { data: decrypted } = await openpgp.decrypt({
             message: encryptedMessage,
             format: 'binary',
-            decryptionKeys: this.private_key
+            decryptionKeys: this.privateKey,
           });
 
           const blob = new Blob([decrypted]);
@@ -526,57 +539,57 @@ export default {
           this.$buefy.toast.open({
             message: `Cannot decrypt the file. Error: ${err}`,
             position: 'is-bottom',
-            type: 'is-danger'
+            type: 'is-danger',
           });
         });
     },
-    handle_private_key() {
+    handlePrivateKey() {
       const reader = new FileReader();
       reader.addEventListener('loadend', async () => {
         try {
           const privateKeyArmored = reader.result;
-          this.private_key = await openpgp.readPrivateKey({ armoredKey: privateKeyArmored });
+          this.privateKey = await openpgp.readPrivateKey({ armoredKey: privateKeyArmored });
         } catch (err) {
           this.$buefy.toast.open({
             message: `Loaded private key is invalid. Error: ${err}`,
             position: 'is-bottom',
-            type: 'is-danger'
+            type: 'is-danger',
           });
         }
       });
-      reader.readAsText(this.private_key_file);
+      reader.readAsText(this.privateKeyFile);
     },
-    handle_public_key() {
+    handlePublicKey() {
       const reader = new FileReader();
       reader.addEventListener('loadend', async () => {
         try {
           const publicKeyArmored = reader.result;
-          this.public_key = await openpgp.readKey({ armoredKey: publicKeyArmored });
+          this.publicKey = await openpgp.readKey({ armoredKey: publicKeyArmored });
         } catch {
           this.$buefy.toast.open({
             message: 'Loaded public key is invalid.',
             position: 'is-bottom',
-            type: 'is-danger'
+            type: 'is-danger',
           });
         }
       });
-      reader.readAsText(this.public_key_file);
+      reader.readAsText(this.publicKeyFile);
     },
-    generate_key_pair() {
+    generateKeyPair() {
       (async () => {
         const { privateKey, publicKey } = await openpgp.generateKey({
           type: 'ecc',
           curve: 'curve25519',
           userIDs: [{ name: this.token, email: 'no@no.no' }],
           passphrase: '',
-          format: 'armored'
+          format: 'armored',
         });
 
         const now = Date.now();
 
         let blob = new Blob([privateKey], { type: 'text/plain' });
         this.download(blob, `litter-private-${now}.asc`);
-        
+
         blob = new Blob([publicKey], { type: 'text/plain' });
         this.download(blob, `litter-public-${now}.asc`);
       })();
@@ -590,11 +603,11 @@ export default {
       a.click();
       URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    }
+    },
   },
   mounted() {
-    this.max_size = Number(process.env.VUE_APP_MAX_FILE_SIZE || 104857600);
-    this.max_size_text = prettyPrintBytes(this.max_size);
+    this.maxSize = Number(process.env.VUE_APP_MAX_FILE_SIZE || 104857600);
+    this.maxSizeText = prettyPrintBytes(this.maxSize);
     axios.get(`${process.env.VUE_APP_API_URL}/token`)
       .then((res) => {
         this.token = res.data.token;
@@ -603,7 +616,7 @@ export default {
         this.tokenError = true;
       });
   },
-  watch: {}
+  watch: {},
 };
 </script>
 
