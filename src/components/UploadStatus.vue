@@ -79,12 +79,12 @@ export default {
 
 <style scoped>
 code {
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .upload-success {
   font-size: x-large;
-  color: black;
+  color: #fff;
 }
 
 #box {
@@ -137,11 +137,12 @@ code {
 }
 
 .failed {
-  background-color: rgba(255, 56, 96, 0.5);
+  background-color: #E8A0BF;
   color: #fff;
 }
 
 .success {
-  background-color: rgba(72, 199, 116, 0.3);
+  background-color: #957DAD;
+  color: #fff;
 }
 </style>

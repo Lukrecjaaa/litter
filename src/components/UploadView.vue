@@ -4,7 +4,7 @@
       <b-radio-button
         v-model="expireAfter"
         native-value="1"
-        type="is-info is-light is-outlined"
+        type="is-success"
       >
         <span>1h</span>
       </b-radio-button>
@@ -12,7 +12,7 @@
       <b-radio-button
         v-model="expireAfter"
         native-value="12"
-        type="is-info is-light is-outlined"
+        type="is-success"
       >
         <span>12h</span>
       </b-radio-button>
@@ -20,7 +20,7 @@
       <b-radio-button
         v-model="expireAfter"
         native-value="24"
-        type="is-info is-light is-outlined"
+        type="is-success"
       >
         <span>1 day</span>
       </b-radio-button>
@@ -28,7 +28,7 @@
       <b-radio-button
         v-model="expireAfter"
         native-value="72"
-        type="is-info is-light is-outlined"
+        type="is-success"
       >
         <span>3 days</span>
       </b-radio-button>
@@ -253,15 +253,15 @@ export default {
     margin: 0 auto;
   }
 
-  @media screen and (min-width: 480px) {
+  @media screen and (min-width: 550px) {
     #upload-field {
       width: 440px;
     }
   }
 
-  @media screen and (max-width: 480px) {
+  @media screen and (max-width: 550px) {
     #upload-field {
-      width: 280px;
+      width: 80%;
     }
   }
 </style>

@@ -19,7 +19,7 @@
     <div v-if="useDecryption" class="encryption-view">
       <p class="justify">
         You're the <b>receiver</b>. To receive a file from someone, generate a
-        <b>public/private key pair</b> and send <b style="color: #f14668;">only</b>
+        <b>public/private key pair</b> and send <b style="color: #E8A0BF;">only</b>
         the public key to them. After that use the private key (you can save it in
         a safe place) to decrypt the encrypted file. Decryption takes place in your
         browser, server only sends the encrypted file to you.
@@ -31,7 +31,7 @@
       <p>
         Private key <b
           :style="{
-            'color': privateKey ? '#48c78e' : '#f14668'
+            'color': privateKey ? '#BA90C6' : '#E8A0BF'
           }">
             {{ privateKey ? "loaded" : "not loaded" }}
         </b>
@@ -77,7 +77,7 @@
     <div v-else class="encryption-view">
       <p class="justify">
         You're the <b>sender</b>. To send the file to someone, ask them to generate a
-        <b>public/private key pair</b> and send <b style="color: #f14668;">only</b>
+        <b>public/private key pair</b> and send <b style="color: #E8A0BF;">only</b>
         the public key to you. Upload the key (you can save it for later use) and use
         it to encrypt the file you want to send. Encryption takes place in your browser
         and no sensitive data is sent to the server before that.
@@ -88,7 +88,7 @@
       <p>
         Public key <b
           :style="{
-            'color': publicKey ? '#48c78e' : '#f14668'
+            'color': publicKey ? '#BA90C6' : '#E8A0BF'
           }">
             {{ publicKey ? "loaded" : "not loaded" }}
         </b>
@@ -233,3 +233,10 @@ export default {
   },
 };
 </script>
+
+<style>
+  .encryption-view {
+    margin: 0 auto;
+    width: 90%;
+  }
+</style>
