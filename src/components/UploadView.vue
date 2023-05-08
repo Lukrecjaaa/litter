@@ -85,6 +85,7 @@ export default {
     };
   },
   methods: {
+    /* Prepare dropped files for upload or encryption */
     handleFiles() {
       this.droppedFiles.forEach((file) => {
         const queueItem = {
@@ -114,6 +115,7 @@ export default {
         }
       });
     },
+    /* Upload dropped file or encrypted blob to /upload endpoint of the API */
     uploadFile(index, formDataEnc = null) {
       const item = this.fileQueue[index];
 
@@ -145,6 +147,7 @@ export default {
 
         axios.post(`${process.env.VUE_APP_API_URL}/upload`, formData, {
           headers,
+          /* Update progress bar on upload progress event */
           onUploadProgress(progressEvent) {
             item.progressPercent = (progressEvent.loaded / progressEvent.total) * 100;
             item.progress_text = prettyPrintBytes(progressEvent.loaded);
@@ -172,6 +175,7 @@ export default {
           });
       }
     },
+    /* Try to remove a file */
     removeFile(index) {
       const item = this.fileQueue[index];
 
@@ -198,6 +202,7 @@ export default {
           item.removed = false;
         });
     },
+    /* Encrypt file and prepare it for upload */
     encryptFile(index) {
       const item = this.fileQueue[index];
 

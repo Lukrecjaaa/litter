@@ -27,6 +27,7 @@
 
       <hr>
 
+      <!-- Color the loaded/not loaded message in green or red, respectively -->
       <p>
         Private key <b
           :style="{
@@ -140,6 +141,7 @@ export default {
   },
   props: ['burnAfterDownload', 'maxSize', 'token'],
   methods: {
+    /* Try to open a private key file and parse it with OpenPGP */
     handlePrivateKey() {
       const reader = new FileReader();
       reader.addEventListener('loadend', async () => {
@@ -156,6 +158,7 @@ export default {
       });
       reader.readAsText(this.privateKeyFile);
     },
+    /* Same as above, but for a public key file */
     handlePublicKey() {
       const reader = new FileReader();
       reader.addEventListener('loadend', async () => {
@@ -172,6 +175,7 @@ export default {
       });
       reader.readAsText(this.publicKeyFile);
     },
+    /* Generate a random key pair with no passphrase in armored format, and download it */
     generateKeyPair() {
       (async () => {
         const { privateKey, publicKey } = await openpgp.generateKey({
@@ -191,11 +195,14 @@ export default {
         download(blob, `litter-public-${now}.asc`);
       })();
     },
+    /* Disable the user input, download file as blob, decrypt it in memory and download it */
     decryptFile() {
       this.downloadingEncFile = true;
 
       axios.get(this.encryptedUrl, { responseType: 'arraybuffer' })
         .then(async (res) => {
+          /* Extract the original file name without .gpg
+             extension from Content-Disposition header */
           const filename = /filename="(.*)\.gpg"/.exec(res.headers['content-disposition'])[1];
           const encrypted = new Uint8Array(res.data);
 

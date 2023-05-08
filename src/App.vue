@@ -62,31 +62,16 @@ export default {
   },
   data() {
     return {
-      droppedFiles: [],
-      droppedFilesEnc: [],
-      fileQueue: [],
-      fileQueueEnc: [],
-      fileQueueEncUpload: [],
-      expireAfter: '24',
       maxSize: 0,
       maxSizeText: '',
-      index: 0,
-      indexEnc: 0,
-      indexEncUpload: 0,
       token: '',
       tokenError: false,
       burnAfterDownload: false,
       encrypt: false,
-      useDecryption: false,
-      privateKeyFile: null,
-      privateKey: null,
-      publicKeyFile: null,
-      publicKey: null,
-      encryptedUrl: '',
-      downloadingEncFile: false,
     };
   },
   mounted() {
+    /* Get token and format maxSize to a human-readable format */
     this.maxSize = Number(process.env.VUE_APP_MAX_FILE_SIZE || 104857600);
     this.maxSizeText = prettyPrintBytes(this.maxSize);
     axios.get(`${process.env.VUE_APP_API_URL}/token`)

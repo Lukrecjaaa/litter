@@ -51,12 +51,14 @@ export default {
     };
   },
   methods: {
+    /* Copy text to clipboard and show a message for a short while */
     copyClipboard() {
       this.show_url = false;
       navigator.clipboard.writeText(this.item.url);
 
       setTimeout(() => { this.show_url = true; }, 1500);
     },
+    /* Convert hours to a more human-readable format */
     lengthText(expireAfter) {
       switch (expireAfter) {
         case '1':
