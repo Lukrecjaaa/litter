@@ -1,41 +1,42 @@
 <!-- eslint-disable vue/no-deprecated-v-on-native-modifier -->
 <template>
-  <div id="box" :class="(failed) ? 'failed' : (uploaded) ? 'success' : ''">
+  <div id="box" :class="(item.failed) ? 'failed' : (item.uploaded) ? 'success' : ''">
     <div id="outer">
-      <div id="inner" v-if="started">
-        <p>Uploading {{ file.name }}...</p>
-        <b-progress type="is-success" :value="progressPercent" show-value>
-          {{ progressText }}
+      <div id="inner" v-if="item.started">
+        <p>Uploading {{ item.file.name }}...</p>
+        <b-progress type="is-success" :value="item.progressPercent" show-value>
+          {{ item.progressText }}
         </b-progress>
       </div>
 
-      <div id="inner" v-else-if="uploaded">
-        <p>{{ file.name }}</p>
-        <code class="upload-success" v-if="show_url" @click="copyClipboard">{{ url }}</code>
+      <div id="inner" v-else-if="item.uploaded">
+        <p>{{ item.file.name }}</p>
+        <code class="upload-success" v-if="show_url" @click="copyClipboard">{{ item.url }}</code>
         <p style="font-size: large; margin: 3px;" v-else>Copied to clipboard!</p>
       </div>
 
-      <div v-else-if="failed">
-        <p>{{ errText }} <code>{{ file.name }}</code>: {{ errMessage }}</p>
+      <div v-else-if="item.failed">
+        <p>{{ item.errText }} <code>{{ item.file.name }}</code>: {{ item.errMessage }}</p>
       </div>
 
-      <div v-else-if="removed">
-        <p>File <code>{{ file.name }}</code> safely removed!</p>
+      <div v-else-if="item.removed">
+        <p>File <code>{{ item.file.name }}</code> safely removed!</p>
       </div>
 
-      <div id="button-div" v-if="started || uploaded">
+      <div id="button-div" v-if="item.started || item.uploaded">
         <b-icon
           icon="trash-can"
           id="remove-button"
-          v-if="uploaded"
+          v-if="item.uploaded"
           @click.native="$emit('remove')">
         </b-icon>
         <div id="expires">
           <p style="font-size: 0.8rem;">
             <b-icon icon="history" size="is-small"></b-icon>
-            {{ lengthText(expireAfter) }}
+            {{ lengthText(item.expireAfter) }}
           </p>
         </div>
+        <b-icon v-if="item.burn" icon="fire" size="is-small"></b-icon>
       </div>
     </div>
   </div>
@@ -43,7 +44,7 @@
 
 <script>
 export default {
-  props: ['file', 'started', 'uploaded', 'failed', 'removed', 'errText', 'errMessage', 'url', 'progressPercent', 'progressText', 'expireAfter'],
+  props: ['item'],
   data() {
     return {
       show_url: true,
@@ -52,7 +53,7 @@ export default {
   methods: {
     copyClipboard() {
       this.show_url = false;
-      navigator.clipboard.writeText(this.url);
+      navigator.clipboard.writeText(this.item.url);
 
       setTimeout(() => { this.show_url = true; }, 1500);
     },
