@@ -150,7 +150,7 @@ export default {
           /* Update progress bar on upload progress event */
           onUploadProgress(progressEvent) {
             item.progressPercent = (progressEvent.loaded / progressEvent.total) * 100;
-            item.progress_text = prettyPrintBytes(progressEvent.loaded);
+            item.progressText = prettyPrintBytes(progressEvent.loaded);
           },
           timeout: 300000,
           params: {
