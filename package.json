@@ -43,8 +43,9 @@
     "rules": {}
   },
   "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead"
+    ">0.01%",
+    "defaults",
+    "supports es6-module",
+    "Firefox ESR"
   ]
 }
